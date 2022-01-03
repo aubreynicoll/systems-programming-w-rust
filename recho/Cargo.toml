@@ -1,0 +1,18 @@
+[package]
+name = "recho"
+version = "0.1.0"
+edition = "2021"
+authors = ["Aubrey Nicoll <aubrey.nicoll@gmail.com>"]
+license = "MIT or Apache-2.0"
+description = "A Rust implementation of the classic UNIX echo"
+keywords = ["cli", "echo",]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+structopt = "0"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "2"
