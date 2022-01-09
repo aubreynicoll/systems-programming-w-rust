@@ -4,7 +4,7 @@ use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-const MAX_CONSECUTIVE_NEWLINES: u32 = 2;
+const MAX_CONSECUTIVE_EMPTY_LINES: u32 = 1;
 
 #[derive(Debug, StructOpt)]
 #[structopt(author, about)]
@@ -59,11 +59,25 @@ impl Cli {
         output: &mut impl io::Write,
     ) -> Result<(), Box<dyn Error>> {
         let mut line_count: u32 = 0;
-        let mut consecutive_newlines: u32 = 1; // treat new input as having 1 previous newline
+        let mut consecutive_empty_lines: u32 = 0;
 
         // read lines via String buffer
         let mut buf = String::new();
         while input.read_line(&mut buf)? != 0 {
+            // handle squeeze empty lines
+            if self.squeeze_empty_lines {
+                if buf.chars().next() == Some('\n') {
+                    consecutive_empty_lines += 1;
+                } else {
+                    consecutive_empty_lines = 0;
+                }
+
+                if consecutive_empty_lines > MAX_CONSECUTIVE_EMPTY_LINES {
+                    buf.clear();
+                    continue;
+                }
+            }
+
             // handle line numbering
             if self.number_non_blank_lines {
                 if buf.chars().next() != Some('\n') {
@@ -77,19 +91,6 @@ impl Cli {
 
             // write to output
             for c in buf.chars() {
-                // handle squeeze empty lines
-                if self.squeeze_empty_lines {
-                    if c == '\n' {
-                        consecutive_newlines += 1;
-                    } else {
-                        consecutive_newlines = 0;
-                    }
-
-                    if consecutive_newlines > MAX_CONSECUTIVE_NEWLINES {
-                        continue;
-                    }
-                }
-
                 // handle append dollar sign
                 if self.append_dollar_sign && c == '\n' {
                     write!(output, "$")?;
