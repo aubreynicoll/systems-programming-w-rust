@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::fs::File;
-use std::io::{self, BufRead, BufReader, Read};
+use std::io::{self, BufReader, Read};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -17,22 +17,21 @@ impl Config {
     }
 }
 
-fn count_bytes_from_buffer(buf: &mut impl BufRead) -> usize {
-    let mut count: usize = 0;
+fn count_bytes_from_buffer(buf: &mut impl Read, bytes_out: &mut u64) {
     for _ in buf.bytes() {
-        count += 1;
+        *bytes_out += 1;
     }
-    count
 }
 
-fn count_bytes_from_file(file: File) -> usize {
-    file.metadata().unwrap().len() as usize
+fn count_bytes_from_file(file: &File, bytes_out: &mut u64) {
+    *bytes_out += file.metadata().unwrap().len();
 }
 
 pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
     if config.files.len() == 0 {
         let mut read_stream = BufReader::new(io::stdin());
-        let count = count_bytes_from_buffer(&mut read_stream);
+        let mut count = 0;
+        count_bytes_from_buffer(&mut read_stream, &mut count);
         println!("{}", count);
     } else {
         let mut total_count = 0;
@@ -46,7 +45,8 @@ pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
                 }
             };
 
-            let count = count_bytes_from_file(file);
+            let mut count = 0;
+            count_bytes_from_file(&file, &mut count);
             println!("{} {}", count, path.to_str().unwrap());
             total_count += count;
         }
