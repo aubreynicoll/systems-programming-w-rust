@@ -1,0 +1,26 @@
+[package]
+name = "runiq"
+version = "0.1.0"
+edition = "2021"
+authors = ["Aubrey Nicoll <aubrey.nicoll@gmail.com>"]
+license = "MIT or Apache-2.0"
+description = """
+\nNAME:
+runiq - report or omit repeated lines
+
+DESCRIPTION:
+Rust implementation of GNU uniq.
+Filter  adjacent  matching lines from INPUT (or standard input), writing to OUTPUT (or standard output).
+"""
+keywords = ["cli", "wc", "rbytes"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+structopt = "0.3.26"
+
+[dev-dependencies]
+assert_cmd = "2.0.4"
+predicates = "2.1.1"
+assert_fs = "1.0.7"
+rand = "0.8.4"
+tempfile = "3.3.0"
